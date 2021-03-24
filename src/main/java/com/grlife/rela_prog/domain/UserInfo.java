@@ -1,4 +1,4 @@
-package com.grlife.login.domain;
+package com.grlife.rela_prog.domain;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

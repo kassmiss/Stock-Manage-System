@@ -34,11 +34,6 @@ public class RelaController {
         this.apiService = apiService;
     }
 
-    @RequestMapping("/")
-    public String home(Model model) {
-        return "home.html";
-    }
-
     /* 대시보드 */
     @RequestMapping("/m/items")
     public String dashboard(Model model) {

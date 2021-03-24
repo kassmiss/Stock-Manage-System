@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface RelaRepository {
-
     List<Map<String, Object>> selectDiagram();
     List<Map<String, Object>> selectRelationGroups(Map<String, Object> data);
     void saveRelationGroup(Map<String, Object> data) throws MessageException, IOException;
     void deleteRelationGroup(Map<String, Object> data) throws MessageException, IOException;
-
 }
