@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="/layout/default">
+<head>
+    <meta charset="UTF-8">
+    <title>그룹관리</title>
+</head>
+
+<!-- index.html 고유 CSS 추가 -->
+<th:block layout:fragment="css">
+</th:block>
+
+<!-- index.html 고유 스크립트 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        $(document).ready(function() {
+
+            $("#mainCode, #mainName").on("change", function() {
+
+               if($(this).attr("id") == "mainCode") $("#mainName").val("");
+               if($(this).attr("id") == "mainName") $("#mainCode").val("");
+
+               if($.trim($("#mainCode").val()).length > 0 || $.trim($("#mainName").val()).length > 0) {
+                   $(".btnOk1").attr("disabled", false);
+               } else {
+                   $(".btnOk1").attr("disabled", true);
+               }
+
+            });
+
+            $("#subCode, #subName").on("change", function() {
+
+                if($(this).attr("id") == "subCode") $("#subName").val("");
+                if($(this).attr("id") == "subName") $("#subCode").val("");
+
+                if($.trim($("#subCode").val()).length > 0 || $.trim($("#subName").val()).length > 0) {
+                    $(".btnOk2").attr("disabled", false);
+                } else {
+                    $(".btnOk2").attr("disabled", true);
+                }
+
+            });
+
+            $(".btnOk1").on("click", function() {
+               rela.callData(getCtx() + "/api/getItemInfo", {
+                   "code" : $("#mainCode").val()
+                   ,"name" : $("#mainName").val()
+               }, {
+                   successDatafnc : function(resData, Data, Param) {
+                        $("#mainCode").val(Data[0].code);
+                        $("#mainName").val(Data[0].name);
+                   }
+               });
+            });
+
+            $(".btnOk2").on("click", function() {
+                rela.callData(getCtx() + "/api/getItemInfo", {
+                    "code" : $("#subCode").val()
+                    ,"name" : $("#subName").val()
+                }, {
+                    successDatafnc : function(resData, Data, Param) {
+                        $("#subCode").val(Data[0].code);
+                        $("#subName").val(Data[0].name);
+                    }
+                });
+            });
+
+            $(".btnSave").on("click", function() {
+                var data = rela.form2Object($("#form"));
+
+                rela.callData(getCtx() + "/m/relation_group/save", data, {
+                    successDatafnc : function(resData, Data, Param) {
+                        $(".clearData").val("");
+                    }, errorfnc : function(retCode, errorMessage) {
+                        alert(errorMessage);
+                        $(".clearData").val("");
+                    }
+                });
+            });
+
+            $(".btnDelete").on("click", function() {
+
+                var data = {
+                    "idx" : $(this).data("idx")
+                }
+
+                rela.callData(getCtx() + "/m/relation_group/delete", data, {
+                    successDatafnc : function(resData, Data, Param) {
+                        location.reload();
+                    }
+                });
+            });
+
+            $(".btnReload").on("click", function() {
+                location.reload();
+            });
+
+        });
+    </script>
+
+</th:block>
+
+<body>
+<th:block layout:fragment="content">
+
+    <div class="my-3 p-3 bg-body rounded shadow-sm">
+        <div id="form">
+            <div class="row">
+                <div class="col-3">
+                    <div class="ccc input-group col mb-3">
+                        <span class="input-group-text" id="basic-addon1">주품목</span>
+                        <input type="text" class="form-control dataValue" placeholder="코드" aria-label="mainCode" aria-describedby="basic-addon1" id="mainCode" name="mainCode">
+                        <input type="text" class="form-control dataValue" placeholder="명칭" id="mainName" name="mainName">
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btnOk1 btn btn-success" disabled>확인</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="ccc input-group col mb-3">
+                        <span class="input-group-text" id="basic-addon2">부품목</span>
+                        <input type="text" class="form-control dataValue clearData" placeholder="코드" aria-label="subCode" aria-describedby="basic-addon1" id="subCode" name="subCode">
+                        <input type="text" class="form-control dataValue clearData" placeholder="명칭" id="subName" name="subName">
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btnOk2 btn btn-success" disabled>확인</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <div class="ccc input-group col mb-3">
+                        <span class="input-group-text" id="basic-addon3">연결명칭</span>
+                        <input type="text" class="form-control dataValue" placeholder="납품, 협력 등" aria-label="relName" aria-describedby="basic-addon1" id="relName" name="relName">
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btnSave btn btn-success">저장</button>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btnReload btn btn-success">새로고침</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div>
+        <table id="items-table" class="table table-striped">
+            <thead>
+            <th scope="col">삭제</th>
+            <th scope="col">주품목</th>
+            <th scope="col">부품목</th>
+            <th scope="col">연결명칭</th>
+            <th scope="col">등록일</th>
+            </thead>
+            <tbody>
+            <tr th:each="sList : ${list}">
+                <th><button type="button" class="btnDelete btn btn-warning btn-sm" th:attr="data-idx=${sList.idx}">삭제</button></th>
+                <th th:text="|${sList.mainCode}${sList.mainName}|"></th>
+                <th th:text="|[${sList.subCode}]${sList.subName}|"></th>
+                <th th:text="${sList.relName}"></th>
+                <th th:text="${sList.rgstDttm}"></th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</th:block>
+</body>
+</html>

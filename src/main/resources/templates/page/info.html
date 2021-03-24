@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<meta http-equiv="refresh" content="5">
+<th:block layout:fragment="script">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script th:inline="javascript">
+        $(document).ready(function(){
+            $(".detailTxt").css("color", [[${map.color}]]);
+        });
+    </script>
+</th:block>
+
+<body>
+<span th:text="${map.error}" />
+<th:block layout:fragment="content">
+    <div>
+        <span th:text="${map.name}" />
+        <span th:if="${map.code} != ''" th:text="'[' + ${map.code} + ']'" />
+    </div>
+    <div class="detailTxt">
+        <span th:text="${map.price}"></span>
+        <span th:text="${map.upDown}"></span>
+        <span th:text="${map.cPrice}"></span>
+        <span th:if="${map.cPer} != ''" th:text="'(' + ${map.cPer} + '%)'"></span>
+    </div>
+    <div>
+        <span th:text="${#calendars.format(#calendars.createNow())}"></span>
+    </div>
+</th:block>
+</body>
+</html>

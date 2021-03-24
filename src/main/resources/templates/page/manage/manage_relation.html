@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="/layout/default">
+<head>
+    <meta charset="UTF-8">
+    <title>연결관리</title>
+</head>
+
+<!-- index.html 고유 CSS 추가 -->
+<th:block layout:fragment="css">
+</th:block>
+
+<!-- index.html 고유 스크립트 추가 -->
+<th:block layout:fragment="script">
+<script type="text/javascript">
+
+    $(document).ready(function(){
+
+        $(".btnSave").on("click", function() {
+            var data = rela.form2Object($("#form"));
+
+            rela.callData("/m/relation/save", data, {
+                successDatafnc : function(resData, Data, Param) {
+                    location.reload();
+                }
+            });
+        });
+
+        $(".btnDelete").on("click", function() {
+
+            var data = {
+                "idx" : $(this).data("idx")
+            }
+
+            rela.callData("/m/relation/delete", data, {
+                successDatafnc : function(resData, Data, Param) {
+                    location.reload();
+                }
+            });
+        });
+
+        $("#name").on("change", function() {
+            if($.trim($(this).val()).length > 0) {
+                btnCtrl("SUCCESS");
+            } else {
+                btnCtrl("CLEAR");
+            }
+        });
+
+        var btnCtrl = function(c) {
+
+            if(c == "CLEAR") {
+                $(".btnSave").attr("disabled", true);
+            } else if(c == "SUCCESS") {
+                $(".btnSave").attr("disabled", false);
+            }
+
+        };
+
+    });
+
+</script>
+</th:block>
+
+<body>
+<th:block layout:fragment="content">
+
+    <div class="my-3 p-3 bg-body rounded shadow-sm">
+        <div id="form">
+            <div class="row">
+                <div class="col-3">
+                    <div class="input-group col-3">
+                        <span class="input-group-text" id="basic-addon2">명칭</span>
+                        <input type="text" class="form-control" placeholder="" aria-label="name" aria-describedby="basic-addon2" id="name" name="name" >
+                    </div>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="btnSave btn btn-success" disabled>저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <table id="items-table" class="table table-striped">
+            <thead>
+            <th scope="col">삭제</th>
+            <th scope="col">명칭</th>
+            <th scope="col">등록일</th>
+            </thead>
+            <tbody>
+            <tr th:each="sList : ${list}">
+                <th><button type="button" class="btnDelete btn btn-warning btn-sm" th:attr="data-idx=''+ ${sList.idx}">삭제</button></th>
+                <th th:text="${sList.name}"></th>
+                <th th:text="${sList.rgstDttm}"></th>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</th:block>
+</body>
+</html>

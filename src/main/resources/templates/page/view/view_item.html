@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="/layout/default">
+<meta http-equiv="refresh" content="5">
+
+<!-- index.html 고유 CSS 추가 -->
+<th:block layout:fragment="css">
+</th:block>
+
+<!-- index.html 고유 스크립트 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+        $(document).ready( function () {
+            $('#myTable').DataTable({
+                'rowsGroup' : [0]
+            });
+        });
+    </script>
+</th:block>
+
+<body>
+<th:block layout:fragment="content">
+    <table id="myTable" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>대주제</th>
+                <th>타이틀</th>
+                <th>현재가</th>
+                <th>레이팅</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="sList : ${list}" th:if="${sList.parent} != ''">
+                <td th:text="${sList.parent}"></td>
+                <td th:text="|[${sList.code}]${sList.name}|"></td>
+                <th th:text="${sList.price}" style="text-align: right"></th>
+                <th th:text="|${sList.upDown}${sList.cPrice}(${sList.cPer})|" th:style="${sList.upDown == '+' ? 'color:orange;text-align:right;' : 'color:steelblue;text-align:right;'}"></th>
+            </tr>
+        </tbody>
+    </table>
+
+
+</th:block>
+</body>
+</html>

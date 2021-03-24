@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="/layout/default">
+
+<head>
+    <title>업체관리</title>
+
+
+</head>
+
+<!-- index.html 고유 CSS 추가 -->
+<th:block layout:fragment="css">
+</th:block>
+
+<!-- index.html 고유 스크립트 추가 -->
+<th:block layout:fragment="script">
+    <script th:inline="javascript">
+
+        var myDiagram;
+
+        $(document).ready(function(){
+
+            var roundedRectangleParams = {
+                parameter1: 2,  // set the rounded corner
+                spot1: go.Spot.TopLeft, spot2: go.Spot.BottomRight  // make content go all the way to inside edges of rounded corners
+            };
+
+            var mt8 = new go.Margin(8, 0, 0, 0);
+            var mr8 = new go.Margin(0, 8, 0, 0);
+            var ml8 = new go.Margin(0, 0, 0, 8);
+
+            var $ = go.GraphObject.make;
+
+            var myDiagram =
+                $(go.Diagram, "myDiagramDiv",
+                    {
+                        "undoManager.isEnabled": true,
+                        layout: $(go.TreeLayout,
+                            { angle: 90, layerSpacing: 35 })
+                    });
+
+            function textStyle(field) {
+                return [
+                    {
+                        font: "12px Roboto, sans-serif", stroke: "rgba(0, 0, 0, .60)",
+                        visible: false
+                    },
+                    new go.Binding("visible", field, function(val) { return val !== undefined; })
+                ];
+            }
+
+            function textColor(v) {
+
+                if(v == "+") return "red";
+                else if(v == "-") return "blue";
+                else return "";
+
+            }
+
+    // the template we defined earlier
+            myDiagram.nodeTemplate =
+                $(go.Node, "Auto",
+                    {
+                        locationSpot: go.Spot.Top,
+                        isShadowed: true, shadowBlur: 1,
+                        shadowOffset: new go.Point(0, 1),
+                        shadowColor: "rgba(0, 0, 0, .14)",
+                        selectionAdornmentTemplate:  // selection adornment to match shape of nodes
+                            $(go.Adornment, "Auto",
+                                $(go.Shape, "RoundedRectangle", roundedRectangleParams,
+                                    { fill: null, stroke: "#7986cb", strokeWidth: 3 }
+                                ),
+                                $(go.Placeholder)
+                            )  // end Adornment
+                    },
+                    $(go.Shape, "RoundedRectangle", roundedRectangleParams,
+                        { name: "SHAPE", fill: "#ffffff", strokeWidth: 0 },
+                        // gold if highlighted, white otherwise
+                        new go.Binding("fill", "isHighlighted", function(h) { return h ? "gold" : "#ffffff"; }).ofObject()
+                    ),
+                    $(go.Panel, "Vertical",
+                        $(go.Panel, "Horizontal",
+                            { margin: 8 },
+                            $(go.Panel, "Table",
+                                $(go.TextBlock,
+                                    {
+                                        row: 0, alignment: go.Spot.Left,
+                                        font: "16px Roboto, sans-serif",
+                                        stroke: "rgba(0, 0, 0, .87)",
+                                        maxSize: new go.Size(160, NaN)
+                                    },
+                                    new go.Binding("text", "name")
+                                ),
+
+                                $("PanelExpanderButton", "INFO",
+                                    { row: 0, column: 1, rowSpan: 2, margin: ml8 }
+                                )
+                            )
+                        ),
+                        $(go.Shape, "LineH",
+                            {
+                                stroke: "rgba(0, 0, 0, .60)", strokeWidth: 1,
+                                height: 1, stretch: go.GraphObject.Horizontal
+                            },
+                            new go.Binding("visible").ofObject("INFO")  // only visible when info is expanded
+                        ),
+
+                        $(go.Panel, "Vertical",
+                            {
+                                name: "INFO",  // identify to the PanelExpanderButton
+                                stretch: go.GraphObject.Horizontal,  // take up whole available width
+                                margin: 8
+                            },
+                            $(go.Panel, "Horizontal",
+                                {
+                                  margin: 5
+                                },
+                                $(go.TextBlock, textStyle("price"),
+                                    new go.Binding("text", "price")
+                                )
+                            ),
+                            $(go.Panel, "Horizontal",
+                                $(go.TextBlock, textStyle("upDown"),
+                                    new go.Binding("text", "upDown"),
+                                    new go.Binding("stroke", "upDown", function(upDown) {
+                                        return textColor(upDown);
+                                    })
+                                ),
+                                $(go.TextBlock, textStyle("cPrice"),
+                                    new go.Binding("text", "cPrice"),
+                                    new go.Binding("stroke", "upDown", function(upDown) {
+                                        return textColor(upDown);
+                                    })
+                                ),
+                                $(go.TextBlock, textStyle("cPer"),
+                                    new go.Binding("text", "cPer", function(cPer) {
+                                        return " (" + cPer + "%)";
+                                    }),
+                                    new go.Binding("stroke", "upDown", function(upDown) {
+                                        return textColor(upDown);
+                                    })
+                                )
+                            )
+
+                        )
+
+
+                    )
+                );
+
+    // define a Link template that routes orthogonally, with no arrowhead
+            myDiagram.linkTemplate =
+                $(go.Link,
+                    { routing: go.Link.Orthogonal, corner: 5 },
+                    $(go.Shape,// the link's path shape
+                        { strokeWidth: 3, stroke: "#555" })/*,
+                    $(go.Panel, "Auto",
+                        $(go.Shape, "RoundedRectangle", { fill: "steelblue", stroke: "white" }),
+                        $(go.TextBlock,
+                            new go.Binding("text", "text", function(text) {
+                                if(text != "") return text;
+                            }))
+                    )*/
+                );
+
+            var model = $(go.TreeModel);
+
+            var list = [[${list}]];
+            var listCnt = list.length;
+            var arr = new Array();
+            var linkArr = new Array();
+
+            for(var i=0; i<listCnt; i++) {
+                var obj = new Object();
+                obj.key = list[i].key;
+                obj.parent = list[i].parent;
+                obj.name = list[i].name;
+                obj.price = list[i].price;
+                obj.upDown = list[i].upDown;
+                obj.cPrice = list[i].cPrice;
+                obj.cPer = list[i].cPer;
+
+                arr[i] = obj;
+
+                var linkObj = new Object();
+                linkObj.from = list[i].from;
+                linkObj.to = list[i].to;
+                linkObj.text = list[i].text;
+
+                linkArr[i] = linkObj;
+            }
+
+            model.nodeDataArray = arr;
+            model.linkDataArray = linkArr;
+            /*model.nodeDataArray = [
+                {
+                    key: "디지털화폐",
+                    parent: "",
+                    name: "디지털화폐"
+
+                },
+                {
+                    key: "로지시스",
+                    parent: "디지털화폐",
+                    name: "로지시스로지시스",
+                    upDown : "+",
+                    price : "1,234",
+                    cPrice : "1,234",
+                    cPer : "50"
+                },
+                {
+                    key: "케이사인",
+                    parent: "디지털화폐",
+                    name: "케이사인케이사인",
+                    upDown : "-",
+                    price : "1,234",
+                    cPrice : "1,234",
+                    cPer : "50"
+                }
+            ];*/
+
+            //myDiagram.model = model;
+            myDiagram.model = new go.GraphLinksModel(model.nodeDataArray, model.linkDataArray);
+
+            // the Search functionality highlights all of the nodes that have at least one data property match a RegExp
+
+            $("#searchBtn").on("click", function() {
+                var input = $("#mySearch");
+                if (!input) return;
+                myDiagram.focus();
+
+                myDiagram.startTransaction("highlight search");
+
+                if (input.value) {
+                    // search four different data properties for the string, any of which may match for success
+                    // create a case insensitive RegExp from what the user typed
+                    var regex = new RegExp(input.value, "i");
+                    var results = myDiagram.findNodesByExample({ name: regex });
+                    myDiagram.highlightCollection(results);
+                    // try to center the diagram at the first node that was found
+                    if (results.count > 0) myDiagram.centerRect(results.first().actualBounds);
+                } else {  // empty string only clears highlighteds collection
+                    myDiagram.clearHighlighteds();
+                }
+
+                myDiagram.commitTransaction("highlight search");
+            });
+
+
+        });
+
+
+    </script>
+</th:block>
+
+<body>
+<th:block layout:fragment="content">
+    <div style="position: relative;">
+        <input type="search" id="mySearch">
+        <button id="searchBtn">Search</button>
+        <div class="col" id="myDiagramDiv" style="background-color: #f2f2f2; border: solid 1px black; width: 100%; height: 880px"></div>
+    </div>
+</th:block>
+</body>
+</html>

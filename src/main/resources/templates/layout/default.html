@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lagn="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <title layout:title-pattern="$LAYOUT_TITLE : $CONTENT_TITLE">GRLIFE</title>
+    <th:block th:replace="fragments/config :: configFragment"></th:block>
+</head>
+<header th:replace="fragments/header :: headerFragment"> </header>
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-2"><div th:replace="fragments/menu :: menuFragment"></div></div>
+        <div class="col-10"><div layout:fragment="content"></div></div>
+    </div>
+</div>
+<body th:replace="fragments/footer :: footerFragment"> </body>
+</html>
